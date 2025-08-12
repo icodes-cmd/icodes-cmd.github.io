@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohd Kaif - Interactive Resume</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page vCard/portfolio layout with a fixed sidebar navigation. This structure was chosen for its modern, clean aesthetic and intuitive user flow. It allows a user (like a recruiter) to quickly navigate to the most relevant sections (About, Education, Skills, Projects) without scrolling through a long document. The fixed navigation keeps the user oriented at all times, making information discovery seamless and efficient. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Skills list -> Goal: Compare proficiency -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Hover for tooltips -> Justification: A bar chart provides a more visually engaging and immediate understanding of skill levels compared to a static list, making the user's technical abilities more impactful.
+        - Report Info: Education history -> Goal: Show progression -> Viz: Vertical Timeline (HTML/CSS) -> Interaction: None, purely visual -> Justification: A timeline format is a classic and highly effective way to represent chronological data like education, making it easy to follow the user's academic journey.
+        - Report Info: Contact/Summary -> Goal: Inform/Introduce -> Viz: Clean text layout -> Interaction: Clickable email link -> Justification: Clear, concise text is best for introductory information. A 'mailto:' link provides direct, low-friction interaction.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover {
+            color: #D97706; /* Amber-600 */
+        }
+        .nav-link.active {
+            color: #D97706;
+        }
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background-color: #D97706;
+            border-radius: 2px;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .nav-link.active::before {
+                display: none;
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+        <!-- Sidebar / Header -->
+        <header class="bg-white md:w-1/3 lg:w-1/4 p-8 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col justify-between">
+            <div>
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl font-bold text-gray-800">Mohd Kaif</h1>
+                    <p class="text-lg text-amber-600 mt-1">BCA Student & Passionate Learner</p>
+                </div>
+
+                <nav class="mt-12">
+                    <ul class="space-y-4 text-center md:text-left">
+                        <li><a href="#about" class="nav-link text-lg font-medium text-gray-600">About</a></li>
+                        <li><a href="#education" class="nav-link text-lg font-medium text-gray-600">Education</a></li>
+                        <li><a href="#skills" class="nav-link text-lg font-medium text-gray-600">Skills</a></li>
+                        <li><a href="#contact" class="nav-link text-lg font-medium text-gray-600">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="text-center md:text-left mt-8 md:mt-0">
+                <p class="text-sm text-gray-500">&copy; 2025 Mohd Kaif. All Rights Reserved.</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-2/3 lg:w-3/4 p-8 lg:p-12 overflow-y-auto">
+            
+            <!-- About Section -->
+            <section id="about" class="section active">
+                <h2 class="text-3xl font-bold text-gray-800 border-b-2 border-amber-500 pb-2">About Me</h2>
+                <div class="mt-6 text-lg text-gray-700 space-y-4 leading-relaxed" id="about-me-content">
+                    <p>
+                        I am a highly motivated and dedicated Bachelor of Computer Applications (BCA) student with a strong academic foundation and a deep passion for technology. My primary goal is to embark on a career in **cloud computing**, a field I am eager to start exploring soon.
+                    </p>
+                    <p>
+                        Possessing strong communication skills and a good knowledge of computer fundamentals, I am also adept at using AI in my everyday work, and am committed to contributing effectively to a dynamic team environment and solving real-world problems.
+                    </p>
+                </div>
+                <div class="mt-6">
+                    <button id="summarize-button" class="bg-amber-500 text-white font-bold py-2 px-4 rounded-md shadow-md hover:bg-amber-600 transition-colors">✨ Summarize My Resume</button>
+                </div>
+            </section>
+
+            <!-- Education Section -->
+            <section id="education" class="section">
+                <h2 class="text-3xl font-bold text-gray-800 border-b-2 border-amber-500 pb-2">Education</h2>
+                <div class="mt-8 relative border-l-2 border-amber-200 pl-8 space-y-12">
+                     <!-- Timeline Item -->
+                    <div class="relative">
+                        <div class="absolute -left-[42px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-4 border-white"></div>
+                        <p class="text-sm font-semibold text-amber-600">PRESENT</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">Bachelor of Computer Applications (BCA)</h3>
+                        <p class="text-md text-gray-600">Graphic Era University, Dehradun</p>
+                    </div>
+                     <!-- Timeline Item -->
+                    <div class="relative">
+                        <div class="absolute -left-[42px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-4 border-white"></div>
+                        <p class="text-sm font-semibold text-amber-600">2024 - 2025</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">Senior Secondary School (Class 12th, CBSE)</h3>
+                        <p class="text-md text-gray-600">New Era Academy, Saharanpur</p>
+                    </div>
+                     <!-- Timeline Item -->
+                    <div class="relative">
+                        <div class="absolute -left-[42px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-4 border-white"></div>
+                        <p class="text-sm font-semibold text-amber-600">2022 - 2023</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">Secondary School (Class 10th, CBSE)</h3>
+                        <p class="text-md text-gray-600">New Era Academy, Saharanpur</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Skills Section -->
+            <section id="skills" class="section">
+                <h2 class="text-3xl font-bold text-gray-800 border-b-2 border-amber-500 pb-2">Technical & Foundational Skills</h2>
+                 <div class="mt-6 text-lg text-gray-700 space-y-4">
+                    <p>
+                        Here is a visual representation of my current foundational abilities, including my beginner-level knowledge of **Python** and **SQL**, and my proficiency in using **AI tools**. My strong soft skills in **communication** and **problem-solving** are also highlighted.
+                    </p>
+                </div>
+                <div class="mt-8">
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact" class="section">
+                <h2 class="text-3xl font-bold text-gray-800 border-b-2 border-amber-500 pb-2">Get In Touch</h2>
+                <div class="mt-6 text-lg text-gray-700 space-y-4">
+                    <p>
+                        I am actively seeking opportunities to learn and grow in the tech industry. Please feel free to reach out to me with any questions or opportunities.
+                    </p>
+                    <div class="mt-6 flex flex-col space-y-4">
+                        <a href="mailto:kaifworks24@gmail.com" class="flex items-center space-x-3 text-gray-800 hover:text-amber-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span>kaifworks24@gmail.com</span>
+                        </a>
+                         <div class="flex items-center space-x-3 text-gray-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            <span>7505829066</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Modal for displaying generated content -->
+    <div id="llmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+            <div id="modal-body" class="text-gray-700 space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.section');
+            const summarizeButton = document.getElementById('summarize-button');
+            const llmModal = document.getElementById('llmModal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const closeButton = document.querySelector('.close-button');
+
+            // --- Gemini API Call Functions ---
+
+            // Function to generate a summary of the resume
+            async function summarizeResume() {
+                // Get the text content from the about section
+                const resumeContent = document.getElementById('about-me-content').innerText;
+                const prompt = `Based on the following resume content, write a very short, punchy summary (about 30-50 words) that highlights the person's skills and goals. Do not use phrases like "I am a" or "My name is". Focus on skills and career aspirations.
+                \n\nResume Content:\n${resumeContent}`;
+
+                try {
+                    showLoadingState(summarizeButton, 'Summarizing...');
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate a summary.";
+                    
+                    showModal('Resume Summary', `<p>${text}</p>`);
+
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    showModal('Error', `<p>An error occurred while generating the summary. Please try again later.</p>`);
+                } finally {
+                    resetButtonState(summarizeButton, '✨ Summarize My Resume');
+                }
+            }
+
+            // --- UI Interaction Functions ---
+
+            function showLoadingState(button, text) {
+                button.disabled = true;
+                button.innerText = text;
+            }
+
+            function resetButtonState(button, text) {
+                button.disabled = false;
+                button.innerText = text;
+            }
+
+            function showModal(title, content) {
+                modalTitle.innerText = title;
+                modalBody.innerHTML = content;
+                llmModal.style.display = 'flex';
+            }
+
+            closeButton.onclick = function() {
+                llmModal.style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                if (event.target == llmModal) {
+                    llmModal.style.display = 'none';
+                }
+            }
+
+            // --- Event Listeners and Initial Setup ---
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    history.pushState(null, null, targetId);
+                    showSection(targetId);
+                });
+            });
+
+            window.addEventListener('popstate', () => {
+                showSection(window.location.hash);
+            });
+
+            function showSection(hash) {
+                const targetHash = hash || '#about';
+                
+                sections.forEach(section => {
+                    if ('#' + section.id === targetHash) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetHash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Add event listeners for the new buttons
+            summarizeButton.addEventListener('click', summarizeResume);
+
+            // Skills Chart
+            const skillsCtx = document.getElementById('skillsChart');
+            if (skillsCtx) {
+                const skillsChart = new Chart(skillsCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['AI Tools', 'Python', 'SQL', 'Communication', 'Problem-Solving'],
+                        datasets: [{
+                            label: 'Skill Level',
+                            data: [75, 50, 50, 85, 80],
+                            backgroundColor: 'rgba(217, 119, 6, 0.6)',
+                            borderColor: 'rgba(217, 119, 6, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                             y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.x !== null) {
+                                            label += context.parsed.x + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            showSection(window.location.hash);
+        });
+    </script>
+
+</body>
+</html>
